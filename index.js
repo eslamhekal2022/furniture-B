@@ -20,19 +20,21 @@ import { connectDB } from "./dbConnection/dbConnection.js";
 dotenv.config();
 connectDB();
 
+const FRONTEND_URL = "https://furnitrue-front.vercel.app"; // رابط الفرونت بتاعك
+
 // ⚙️ APP & SERVER SETUP
 const app = express();
-const server = http.createServer(app); // استخدم http.createServer بدلاً من app.listen
+const server = http.createServer(app);
 
-// ⚡ SOCKET.IO SETUP
+// ⚡ SOCKET.IO SETUP مع CORS مضبوط
 const io = new Server(server, {
   cors: {
-    origin: "*", // أو حدد الدومين بتاع الفرونت
-    methods: ["GET", "POST"]
-  }
+    origin: FRONTEND_URL,
+    methods: ["GET", "POST"],
+  },
 });
 
-// 🧠 Make io available in every request
+// 🧠 اجعل io متاح في كل الريكوست
 app.use((req, res, next) => {
   req.io = io;
   next();
@@ -47,11 +49,17 @@ io.on("connection", (socket) => {
   });
 });
 
-// 🔗 MIDDLEWARES
+// 🔗 MIDDLEWARES مع CORS مضبوط
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads'));
-app.use(cors());
+app.use("/uploads", express.static("uploads"));
 app.use(morgan("dev"));
 
 // 📁 ROUTES
