@@ -20,17 +20,45 @@ import { connectDB } from "./dbConnection/dbConnection.js";
 dotenv.config();
 connectDB();
 
-const FRONTEND_URL = "https://furnitrue-front.vercel.app"; // رابط الفرونت بتاعك
+// ✅ السماح للمواقع الأمامية
+const FRONTEND_URLS = [
+  "https://furnitrue-front.vercel.app",
+  "http://localhost:3000",
+];
 
 // ⚙️ APP & SERVER SETUP
 const app = express();
 const server = http.createServer(app);
 
-// ⚡ SOCKET.IO SETUP مع CORS مضبوط
+// ✅ CORS Middleware
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // السماح للطلبات الداخلية (بوستمان، سيرفرات بدون origin)
+      if (!origin || FRONTEND_URLS.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  })
+);
+
+// ✅ (اختياري) - headers مؤقتة لتجربة الـ CORS (يفضل إزالتها بعد النجاح)
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://furnitrue-front.vercel.app");
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
+// ⚡ SOCKET.IO مع CORS
 const io = new Server(server, {
   cors: {
-    origin: FRONTEND_URL,
-    methods: ["GET", "POST"],
+    origin: FRONTEND_URLS,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
   },
 });
 
@@ -40,23 +68,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// 🔌 SOCKET CONNECTION LOGIC
-io.on("connection", (socket) => {
-  console.log("🟢 A client connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("🔴 A client disconnected:", socket.id);
-  });
-});
-
-// 🔗 MIDDLEWARES مع CORS مضبوط
-app.use(
-  cors({
-    origin: FRONTEND_URL,
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+// 🔌 MIDDLEWARES
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
@@ -71,11 +83,20 @@ app.use(OrderRouter);
 app.use(userReviews);
 app.use(ContactRouter);
 
+// 🔗 SOCKET CONNECTION
+io.on("connection", (socket) => {
+  console.log("🟢 A client connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("🔴 A client disconnected:", socket.id);
+  });
+});
+
 // ✅ TEST ROUTE
 app.get("/", (req, res) => {
   res.send("API is running with Socket.IO...");
 });
 
 // 🚀 START SERVER
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
