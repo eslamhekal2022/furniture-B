@@ -102,3 +102,13 @@ res.status(200).json({message:"this is product deleted",success:true,product})
 
   }
 }
+
+export const deleteAllProducts= async (req, res) => {
+  try {
+    await ProductModel.deleteMany()
+    res.status(200).json({message:"delete-All-Products",success:true})
+  } catch (error) {
+    res.status(400).json({message:"someThing Wrong",success:false})
+    
+  }
+}

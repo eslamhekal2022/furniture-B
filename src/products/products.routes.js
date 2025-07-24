@@ -1,6 +1,6 @@
 import express from "express"
 import multer from "multer";
-import { addProduct, deleteProduct, getAllProducts, getCategoryProduct, getFilterCat, productDet } from "./products.controller.js";
+import { addProduct, deleteAllProducts, deleteProduct, getAllProducts, getCategoryProduct, getFilterCat, productDet } from "./products.controller.js";
 import { authMiddleware } from "../../MiddleWare/MiddleWare.js";
 const ProductRouter=express.Router()
 
@@ -20,5 +20,6 @@ ProductRouter.get("/getFilterCat/:category",getFilterCat)
 ProductRouter.get("/productDet/:id",productDet)
 
 ProductRouter.delete("/deleteProduct/:id",deleteProduct)
+ProductRouter.delete("/deleteAllProducts",deleteAllProducts)
 
 export default ProductRouter
