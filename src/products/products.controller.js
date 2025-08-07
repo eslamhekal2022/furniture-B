@@ -39,7 +39,7 @@ export const addProduct = async (req, res) => {
 export const getAllProducts=async (req, res) => {
   const allProducts = await ProductModel.find()
 
-  const count = allProducts.length
+  const count = await ProductModel.countDocuments()
   res.status(200).json({message: "All products",success: true,data:allProducts,count})
 }
 

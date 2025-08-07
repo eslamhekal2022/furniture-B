@@ -80,7 +80,9 @@ res.status(200).json({
 export const getUsers=async(req,res)=>{
     try {
         const users=await userModel.find()
-        res.status(200).json({message:"all users",success:true,data:users})
+            const count = await userModel.countDocuments();
+
+        res.status(200).json({message:"all users",success:true,data:users,count})
     } catch (error) {
 res.status(400).json({ message: "Error while deleting user", success: false, error: error.message });
     }
@@ -99,5 +101,13 @@ try {
     
 }    
 }
-
+export const deleteUsers=async(req,res)=>{
+  try {
+    await userModel.deleteMany()
+    res.status(200).json({message:"all user deleted",success:true})
+  } catch (error) {
+    res.status(400).json({message:"i can't do it ",success:true})
+    
+  }
+}
 
