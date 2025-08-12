@@ -111,3 +111,45 @@ export const deleteUsers=async(req,res)=>{
   }
 }
 
+
+
+  export const updateUserRole = async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { role } = req.body;
+  
+      if (!['user', 'admin',"moderator"].includes(role)) {
+        return res.status(400).json({ success: false, message: "Invalid role provided" });
+      }
+  
+      const updatedUser = await userModel.findByIdAndUpdate(
+        userId,
+        { role },
+        { new: true }
+      );
+  
+      if (!updatedUser) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+  
+      res.status(200).json({
+        success: true,
+        message: "User role updated successfully",
+        user: updatedUser,
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Something went wrong", error });
+    }
+  };
+
+  export const userDet=async (req,res)=>{
+    const {id}=req.params
+
+    try {
+      const user=await userModel.findById(id)
+
+      res.status(200).json({message:"aho el user",success:true,user})
+    } catch (error) {
+      res.status(400).json({message:"check your info",success:true,user})
+    }
+  }
